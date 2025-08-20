@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Health Evaluation and Risk Online</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif; }
+    .bg-gradient-blue { background: linear-gradient(135deg, #1d4ed8, #3b82f6); }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+  <div class="bg-gradient-blue">
+    <header class="max-w-6xl mx-auto px-4 py-10 text-center text-white">
+      <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow">Health Evaluation and Risk Online</h1>
+      <p class="mt-3 text-white/90">แบบประเมินสุขภาพอย่างง่าย พร้อมคำแนะนำตามปัจจัยเสี่ยง</p>
+    </header>
+  </div>
+
+  <!-- Container -->
+  <main class="max-w-6xl mx-auto px-4 pb-16 -mt-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Card: Form -->
+      <section class="bg-white rounded-3xl shadow-2xl p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-1">การประเมินความเสี่ยง</h2>
+        <p class="text-sm text-gray-500 mb-6">ข้อมูลใช้เพื่อการประเมินเบื้องต้นเท่านั้น ไม่ใช่การวินิจฉัยทางการแพทย์</p>
+
+        <form id="health-form" class="grid grid-cols-1 md:grid-cols-2 gap-5" novalidate>
+          <!-- อายุ -->
+          <div>
+            <label for="age" class="block text-sm font-medium text-gray-700">อายุ (ปี) <span class="text-red-500">*</span></label>
+            <input type="number" id="age" name="age" inputmode="numeric" min="1" max="120" placeholder="เช่น 30" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+            <p class="sr-only" id="ageHint">กรอกอายุเป็นตัวเลข 1–120 ปี</p>
+          </div>
+
+          <!-- เพศ -->
+          <div>
+            <label for="sex" class="block text-sm font-medium text-gray-700">เพศ <span class="text-red-500">*</span></label>
+            <select id="sex" name="sex" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <option value="" disabled selected>เลือก</option>
+              <option value="male">ชาย</option>
+              <option value="female">หญิง</option>
+            </select>
+          </div>
+
+          <!-- น้ำหนัก -->
+          <div>
+            <label for="weight" class="block text-sm font-medium text-gray-700">น้ำหนัก (กิโลกรัม) <span class="text-red-500">*</span></label>
+            <input type="number" id="weight" name="weight" inputmode="decimal" min="20" max="300" step="0.1" placeholder="เช่น 65" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+          </div>
+
+          <!-- ส่วนสูง -->
+          <div>
+            <label for="height" class="block text-sm font-medium text-gray-700">ส่วนสูง (ซม.) <span class="text-red-500">*</span></label>
+            <input type="number" id="height" name="height" inputmode="decimal" min="100" max="250" step="0.1" placeholder="เช่น 175" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+          </div>
+
+          <!-- ความดันโลหิต -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700">ความดันโลหิต (mmHg) <span class="text-red-500">*</span></label>
+            <div class="mt-1 flex gap-3">
+              <input type="number" id="sbp" inputmode="numeric" min="70" max="260" placeholder="ตัวบน (SBP) เช่น 120" required class="w-1/2 px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+              <input type="number" id="dbp" inputmode="numeric" min="40" max="160" placeholder="ตัวล่าง (DBP) เช่น 80" required class="w-1/2 px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+            </div>
+          </div>
+
+          <!-- ประวัติครอบครัว -->
+          <div>
+            <label for="family-history" class="block text-sm font-medium text-gray-700">ประวัติครอบครัวโรคไม่ติดต่อเรื้อรัง (NCDs)</label>
+            <select id="family-history" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <option value="no" selected>ไม่มี</option>
+              <option value="yes">มี</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="genetic-diseases" class="block text-sm font-medium text-gray-700">โรคทางพันธุกรรม/พบในครอบครัว</label>
+            <select id="genetic-diseases" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <option value="none" selected>—</option>
+              <option value="diabetes">เบาหวาน</option>
+              <option value="heart-disease">โรคหัวใจ</option>
+              <option value="stroke">โรคหลอดเลือดสมอง</option>
+              <option value="cancer">มะเร็ง</option>
+              <option value="others">อื่น ๆ</option>
+            </select>
+          </div>
+
+          <!-- พฤติกรรม -->
+          <div>
+            <label for="smoking" class="block text-sm font-medium text-gray-700">การสูบบุหรี่</label>
+            <select id="smoking" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <option value="no" selected>ไม่สูบ</option>
+              <option value="yes">สูบ</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="exercise" class="block text-sm font-medium text-gray-700">การออกกำลังกาย</label>
+            <select id="exercise" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <option value="regular" selected>สม่ำเสมอ (>=150 นาที/สัปดาห์)</option>
+              <option value="occasionally">บ้างครั้ง</option>
+              <option value="never">ไม่ออกกำลังกาย</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="diet" class="block text-sm font-medium text-gray-700">รูปแบบการกิน</label>
+            <select id="diet" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <option value="healthy" selected>คุมหวาน มัน เค็ม กินผักผลไม้</option>
+              <option value="unhealthy">หวาน/ทอด/แปรรูปบ่อย</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="job" class="block text-sm font-medium text-gray-700">อาชีพ</label>
+            <select id="job" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <option value="office" selected>งานออฟฟิศ/นั่งนาน</option>
+              <option value="manual">ใช้แรงงาน/ก่อสร้าง</option>
+              <option value="healthcare">ดูแลสุขภาพ</option>
+              <option value="others">อื่น ๆ</option>
+            </select>
+          </div>
+
+          <div class="md:col-span-2 flex gap-3 mt-2">
+            <button type="submit" class="flex-1 bg-indigo-600 text-white font-semibold py-3 px-4 rounded-xl shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">ประเมิน</button>
+            <button type="button" id="reset-btn" class="px-4 py-3 rounded-xl border font-medium text-gray-700 hover:bg-gray-50">ล้างข้อมูล</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Card: Result -->
+      <aside class="bg-white rounded-3xl shadow-2xl p-6 md:p-8" aria-live="polite">
+        <h2 class="text-2xl font-bold text-gray-800 mb-1">ผลการประเมิน</h2>
+        <p class="text-sm text-gray-500 mb-6">จะแสดงหลังจากกดประเมิน</p>
+
+        <div id="result-wrapper" class="space-y-6 hidden">
+          <!-- Summary badge -->
+          <div id="risk-badge" class="inline-flex items-center gap-2 text-white text-sm font-semibold px-3 py-1 rounded-full"></div>
+
+          <!-- Key Numbers -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="rounded-2xl border p-4">
+              <p class="text-sm text-gray-500">BMI</p>
+              <p id="bmi-text" class="text-2xl font-bold">—</p>
+              <p id="bmi-category" class="text-sm mt-1">—</p>
+            </div>
+            <div class="rounded-2xl border p-4">
+              <p class="text-sm text-gray-500">แคลอรี่แนะนำต่อวัน (TDEE)</p>
+              <p id="calorie-intake" class="text-2xl font-bold">—</p>
+              <p class="text-xs text-gray-500 mt-1">คำนวณด้วยสูตร Mifflin-St Jeor + กิจกรรม</p>
+            </div>
+          </div>
+
+          <!-- Recommendations -->
+          <div class="rounded-2xl border p-4">
+            <h3 class="font-semibold text-gray-800">คำแนะนำ</h3>
+            <ul id="recommendations" class="list-disc pl-5 mt-2 space-y-1 text-gray-700"></ul>
+          </div>
+
+          <!-- Disease risk -->
+          <div class="rounded-2xl border p-4">
+            <h3 class="font-semibold text-gray-800">ความเสี่ยงที่เกี่ยวข้อง</h3>
+            <p id="disease-risk" class="text-gray-700 mt-2">—</p>
+          </div>
+
+          <!-- Chart -->
+          <div>
+            <canvas id="bmiChart" height="160"></canvas>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="max-w-6xl mx-auto px-4 pb-10 text-xs text-gray-500">
+    © <span id="year"></span> HER Online · เครื่องมือเพื่อการให้ความรู้ ไม่ใช้ทดแทนการวินิจฉัยของแพทย์
+  </footer>
+
+  <script>
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+    const year = new Date().getFullYear();
+    $('#year').textContent = year;
+
+    const bmiAsiaCategory = (bmi) => {
+      if (bmi < 18.5) return { label: 'ผอม', level: 'low' };
+      if (bmi < 23) return { label: 'ปกติ', level: 'good' };
+      if (bmi < 25) return { label: 'น้ำหนักเกิน (เสี่ยง)', level: 'moderate' };
+      if (bmi < 30) return { label: 'อ้วนระดับ 1', level: 'high' };
+      return { label: 'อ้วนระดับ 2', level: 'very-high' };
+    };
+
+    const bpCategory = (sbp, dbp) => {
+      if (sbp >= 140 || dbp >= 90) return { label: 'ความดันสูง (Stage 2)', score: 3 };
+      if ((sbp >= 130 && sbp <= 139) || (dbp >= 80 && dbp <= 89)) return { label: 'ความดันสูง (Stage 1)', score: 2 };
+      if (sbp >= 120 && dbp < 80) return { label: 'ความดันสูงเล็กน้อย', score: 1 };
+      return { label: 'ปกติ', score: 0 };
+    };
+
+    const activityFactor = (exercise) => {
+      switch (exercise) {
+        case 'regular': return 1.55; // moderate
+        case 'occasionally': return 1.375; // light
+        default: return 1.2; // sedentary
+      }
+    };
+
+    const buildRecommendations = ({ bmi, bmiCat, bpCat, smoking, exercise, diet, age }) => {
+      const recs = [];
+      // Generic
+      recs.push('ตรวจสุขภาพประจำปี และวัดความดันซ้ำอย่างน้อยเดือนละครั้ง');
+      // Weight
+      if (bmi >= 23) recs.push('โฟกัสแคลอรี่ขาดดุล 300–500 kcal/วัน และโปรตีน ≥ 1.2 กรัม/กก.');
+      // Exercise
+      if (exercise !== 'regular') recs.push('เพิ่มการออกกำลังกายแอโรบิก ≥ 150 นาที/สัปดาห์ + เวทเทรนนิงอย่างน้อย 2 วัน/สัปดาห์');
+      // Diet
+      if (diet === 'unhealthy') recs.push('ลดหวาน มัน เค็ม เลือกอาหารไม่ผ่านกระบวนการ ผักผลไม้ ≥ 400 กรัม/วัน');
+      // BP
+      if (bpCat.score >= 1) recs.push('จำกัดโซเดียม < 2,000 มก./วัน เลี่ยงแอลกอฮอล์ และติดตามความดันใกล้ชิด');
+      // Smoking
+      if (smoking === 'yes') recs.push('งดสูบบุหรี่โดยเด็ดขาด และขอรับโปรแกรมเลิกบุหรี่');
+      // Age
+      if (age >= 50) recs.push('ปรึกษาแพทย์เรื่องการคัดกรอง NCDs (เบาหวาน ไขมัน ความดัน หลอดเลือด)');
+      return recs;
+    };
+
+    const riskScore = ({ age, bmi, sbp, dbp, smoking, exercise, diet, familyHistory }) => {
+      let score = 0;
+      if (age >= 50) score += 2;
+      if (bmi >= 30) score += 3; else if (bmi >= 25) score += 2; else if (bmi >= 23) score += 1;
+      score += bpCategory(sbp, dbp).score;
+      if (smoking === 'yes') score += 3;
+      if (exercise === 'never') score += 1;
+      if (diet === 'unhealthy') score += 1;
+      if (familyHistory === 'yes') score += 1;
+      return score;
+    };
+
+    const riskLevel = (score) => {
+      if (score >= 7) return { label: 'ความเสี่ยงสูง', color: 'bg-red-600', text: 'text-red-50' };
+      if (score >= 4) return { label: 'ความเสี่ยงปานกลาง', color: 'bg-amber-500', text: 'text-amber-50' };
+      return { label: 'ความเสี่ยงต่ำ', color: 'bg-emerald-600', text: 'text-emerald-50' };
+    };
+
+    const calorieNeeds = ({ sex, weight, height, age, exercise }) => {
+      // Mifflin-St Jeor BMR
+      const bmr = sex === 'male'
+        ? (10 * weight + 6.25 * height - 5 * age + 5)
+        : (10 * weight + 6.25 * height - 5 * age - 161);
+      return Math.round(bmr * activityFactor(exercise));
+    };
+
+    // Chart instance
+    let bmiChart;
+
+    const renderChart = (bmi) => {
+      const ctx = document.getElementById('bmiChart');
+      const categories = [18.5, 23, 25, 30];
+      const data = [bmi];
+
+      if (bmiChart) bmiChart.destroy();
+
+      bmiChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['BMI ของคุณ'],
+          datasets: [{
+            label: 'ดัชนีมวลกาย (BMI)',
+            data,
+            borderWidth: 1,
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              suggestedMax: Math.max(35, Math.ceil(bmi + 5)),
+              ticks: { stepSize: 5 },
+              grid: { drawBorder: false }
+            }
+          },
+          animation: { duration: 600 }
+        }
+      });
+    };
+
+    const form = document.getElementById('health-form');
+    const resetBtn = document.getElementById('reset-btn');
+
+    resetBtn.addEventListener('click', () => {
+      form.reset();
+      $('#result-wrapper').classList.add('hidden');
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      // read values
+      const age = Number($('#age').value);
+      const sex = $('#sex').value;
+      const weight = Number($('#weight').value);
+      const height = Number($('#height').value);
+      const sbp = Number($('#sbp').value);
+      const dbp = Number($('#dbp').value);
+      const familyHistory = $('#family-history').value;
+      const genetics = $('#genetic-diseases').value;
+      const smoking = $('#smoking').value;
+      const exercise = $('#exercise').value;
+      const diet = $('#diet').value;
+
+      // basic validation
+      const invalid = [age, weight, height, sbp, dbp].some((v) => Number.isNaN(v) || !isFinite(v));
+      if (!sex || invalid) {
+        alert('กรุณากรอกข้อมูลให้ครบและถูกต้อง');
+        return;
+      }
+
+      // BMI
+      const bmi = weight / Math.pow(height / 100, 2);
+      const bmiRounded = Math.round(bmi * 100) / 100;
+      const bmiCat = bmiAsiaCategory(bmi);
+
+      // BP
+      const bpCat = bpCategory(sbp, dbp);
+
+      // Score & Level
+      const score = riskScore({ age, bmi, sbp, dbp, smoking, exercise, diet, familyHistory });
+      const level = riskLevel(score);
+
+      // Calories
+      const calories = calorieNeeds({ sex, weight, height, age, exercise });
+
+      // Render badge
+      const badge = document.getElementById('risk-badge');
+      badge.className = `inline-flex items-center gap-2 text-white text-sm font-semibold px-3 py-1 rounded-full ${level.color}`;
+      badge.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-white/90"></span> ${level.label} <span class="opacity-80">(คะแนน ${score})</span>`;
+
+      // Key numbers
+      $('#bmi-text').textContent = bmiRounded.toFixed(2);
+      $('#bmi-category').textContent = `${bmiCat.label} · ความดัน: ${bpCat.label}`;
+      $('#calorie-intake').textContent = `${calories.toLocaleString('th-TH')} kcal`;
+
+      // Disease risk text
+      const diseaseBits = [];
+      if (familyHistory === 'yes' && genetics !== 'none') {
+        const map = { 'diabetes': 'เบาหวาน', 'heart-disease': 'โรคหัวใจ', 'stroke': 'หลอดเลือดสมอง', 'cancer': 'มะเร็ง', 'others': 'โรคอื่น ๆ' };
+        diseaseBits.push(`ประวัติครอบครัว: ${map[genetics]}`);
+      }
+      if (smoking === 'yes') diseaseBits.push('เสี่ยงโรคหัวใจและปอดจากการสูบบุหรี่');
+      if (bmi >= 23) diseaseBits.push('เสี่ยงกลุ่มโรคเมตาบอลิกจากภาวะน้ำหนักเกิน');
+      if (bpCat.score >= 1) diseaseBits.push('เสี่ยงโรคหลอดเลือดจากความดันสูง');
+      $('#disease-risk').textContent = diseaseBits.length ? diseaseBits.join(' • ') : 'ยังไม่พบปัจจัยเสี่ยงเด่นชัดจากข้อมูลที่ระบุ';
+
+      // Recommendations list
+      const recs = buildRecommendations({ bmi, bmiCat, bpCat, smoking, exercise, diet, age });
+      const ul = $('#recommendations');
+      ul.innerHTML = '';
+      recs.forEach((r) => {
+        const li = document.createElement('li');
+        li.textContent = r;
+        ul.appendChild(li);
+      });
+
+      // Chart
+      renderChart(bmiRounded);
+
+      // Show result
+      $('#result-wrapper').classList.remove('hidden');
+    });
+  </script>
+</body>
+</html>
